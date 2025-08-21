@@ -33,7 +33,7 @@ export default async function handler(req, res) {
         api_key: process.env.FAUCETPAY_API_KEY,
         currency: "DOGE",
         to: address,
-        amount: "0.0001" // contoh
+        amount: "0.003" // contoh
       })
     });
 
