@@ -1,71 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DailyFunHub Faucet - Free DOGE</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DailyFunHub Faucet</title>
 
-  <!-- Adsterra Social Bar -->
-  <script type='text/javascript' src='//pl27468110.profitableratecpm.com/a6/68/b0/a668b013958e55610215c3779c508f5e.js'></script>
+  <!-- Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <!-- Monetag SDK -->
   <script src='//libtl.com/sdk.js' data-zone='9748411' data-sdk='show_9748411'></script>
 
+  <!-- Adsterra Social Bar -->
+  <script type='text/javascript' src='//pl27468110.profitableratecpm.com/a6/68/b0/a668b013958e55610215c3779c508f5e.js'></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #0d1117;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
+      background: #f9f9f9;
+      color: #333;
+      text-align: center;
       padding: 20px;
     }
-    h1 { color: #00c4ff; }
-    input, button {
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 6px;
-      border: none;
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #1a73e8;
     }
     input {
-      width: 300px;
-      max-width: 100%;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     button {
-      background: #00c4ff;
-      font-weight: bold;
+      width: 100%;
+      padding: 12px;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
       cursor: pointer;
     }
-    #result { margin-top: 15px; }
-    .affiliate {
-      margin-top: 20px;
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
     }
-    .affiliate a {
-      color: #ffcc00;
-      text-decoration: none;
-      font-weight: bold;
+    .note {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #555;
+    }
+    .ads {
+      margin: 15px 0;
     }
   </style>
 </head>
 <body>
-  <h1>🚰 DailyFunHub DOGE Faucet</h1>
-  <p>Claim <strong>DOGE</strong> Every 5 Minutes!</p>
-  <p>Instead waiting hourly. Claim Doge every 5 Minutes.</p>
+  <div class="container">
+    <h1>🚰 DailyFunHub Faucet</h1>
+    <p>Klaim DOGE gratis setiap <b>5 menit</b>. Reward lebih cepat dari faucet biasa ⏱️</p>
 
-  <input id="wallet" type="text" placeholder="Alamat Wallet FaucetPay (DOGE)">
-  <button id="claimBtn">Claim DOGE Now</button>
-  <div id="result"></div>
+    <input type="text" id="wallet" placeholder="Wallet Address FaucetPay" />
 
-  <div class="affiliate">
-    Belum punya wallet FaucetPay? 👉 
-    <a href="https://faucetpay.io/?r=37006" target="_blank">Buat Wallet FaucetPay Gratis</a>
+    <div class="ads">
+      <!-- Tempat Iklan -->
+      <p>🔒 Sebelum klaim, tunggu iklan muncul...</p>
+    </div>
+
+    <button id="claimBtn" disabled>Klaim Sekarang</button>
+
+    <div class="note">
+      Belum punya wallet? 👉 
+      <a href="https://faucetpay.io/?r=37006" target="_blank">Buat Wallet FaucetPay</a>
+    </div>
   </div>
 
-  <script src="/claim.js"></script>
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const claimBtn = document.getElementById("claimBtn");
+    const walletInput = document.getElementById("wallet");
+
+    // Auto isi wallet placeholder kalau dari Telegram
+    const userData = tg.initDataUnsafe?.user;
+    if (userData) {
+      console.log("Telegram User:", userData);
+      walletInput.placeholder = `Wallet (Telegram: ${userData.username || userData.id})`;
+    }
+
+    // Simulasi delay iklan → aktifkan tombol setelah 8 detik
+    setTimeout(() => {
+      claimBtn.disabled = false;
+    }, 8000);
+
+    // Claim handler
+    claimBtn.addEventListener("click", () => {
+      const wallet = walletInput.value.trim();
+      if (!wallet) {
+        alert("⚠️ Masukkan alamat wallet FaucetPay dulu!");
+        return;
+      }
+
+      // 🔥 Trigger Adsterra Direct Link (buka di tab baru)
+      window.open("https://www.profitableratecpm.com/qabjgu4pry?key=b3ddcd458c98b1640797a768bc984772", "_blank");
+
+      // TODO: Panggil API klaim (ke /api/claim)
+      alert("✅ Klaim berhasil! Reward akan ditransfer ke " + wallet);
+    });
+  </script>
 </body>
 </html>
-
