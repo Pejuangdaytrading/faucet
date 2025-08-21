@@ -1,13 +1,12 @@
 {
-  "name": "faucet-miniapp",
-  "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel dev"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "node-fetch": "^3.3.2"
+    "next": "14.x",
+    "react": "18.x",
+    "react-dom": "18.x"
   }
 }
