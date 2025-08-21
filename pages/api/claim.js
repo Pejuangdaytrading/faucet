@@ -1,10 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Atur reward DOGE per klaim (misal setara rata-rata faucet per jam)
+// Atur reward DOGE per klaim
 const REWARD_AMOUNT = 0.1; // contoh: 0.1 DOGE
 const COOLDOWN_MINUTES = 5; 
 const REFERRAL_BONUS = 0.1; // 10%
@@ -57,16 +57,10 @@ export default async function handler(req, res) {
     if (insertError) throw insertError;
 
     // 3. Update saldo user
-    const { error: balanceError } = await supabase
-      .from("balances")
-      .upsert({
-        wallet,
-        balance: REWARD_AMOUNT,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "wallet" })
-      .select();
-
-    if (balanceError) throw balanceError;
+    await supabase.rpc("increment_balance", { 
+      p_wallet: wallet, 
+      p_amount: REWARD_AMOUNT 
+    });
 
     // 4. Cek referral → beri bonus ke referrer
     const { data: referral } = await supabase
@@ -77,13 +71,10 @@ export default async function handler(req, res) {
 
     if (referral && referral.referrer_wallet) {
       const bonusAmount = REWARD_AMOUNT * REFERRAL_BONUS;
-      await supabase
-        .from("balances")
-        .upsert({
-          wallet: referral.referrer_wallet,
-          balance: bonusAmount,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "wallet" });
+      await supabase.rpc("increment_balance", { 
+        p_wallet: referral.referrer_wallet, 
+        p_amount: bonusAmount 
+      });
     }
 
     return res.status(200).json({
