@@ -10,41 +10,32 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ✅ Verify captcha
-    const captchaRes = await fetch("https://hcaptcha.com/siteverify", {
+    // 1. Verify hCaptcha
+    const verifyRes = await fetch("https://hcaptcha.com/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `secret=${process.env.HCAPTCHA_SECRET}&response=${token}`,
+      body: `response=${token}&secret=${process.env.HCAPTCHA_SECRET}`
     });
 
-    const captchaData = await captchaRes.json();
-
-    if (!captchaData.success) {
+    const verifyData = await verifyRes.json();
+    if (!verifyData.success) {
       return res.status(400).json({ error: "Captcha verification failed" });
     }
 
-    // ✅ Send faucet payment via FaucetPay API
-    const payoutRes = await fetch("https://faucetpay.io/api/v1/send", {
+    // 2. Send faucet payment via FaucetPay
+    const fpRes = await fetch("https://faucetpay.io/api/v1/send", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        api_key: process.env.FAUCETPAY_API_KEY,
-        currency: "DOGE",
-        to: address,
-        amount: 0.00001, // Test kecil dulu
-      }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `api_key=${process.env.FAUCETPAY_API_KEY}&currency=DOGE&amount=0.5&to=${address}`
     });
 
-    const payoutData = await payoutRes.json();
-
-    if (payoutData.status === 200) {
-      return res.status(200).json({ success: true, message: "Payment sent!" });
+    const fpData = await fpRes.json();
+    if (fpData.status === 200) {
+      return res.json({ success: true, payout: fpData.payout });
     } else {
-      return res.status(500).json({ error: payoutData.message || "Payment failed" });
+      return res.status(400).json({ error: fpData.message });
     }
-
   } catch (err) {
-    console.error("Claim error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Server error: " + err.message });
   }
 }
