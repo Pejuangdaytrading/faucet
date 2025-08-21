@@ -1,87 +1,99 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Konfigurasi faucet
-const COIN = "DOGE";
-const COOLDOWN_MINUTES = 5;
-const REWARD = 0.01; // misal 0.01 DOGE per claim (setara hourly faucet dibagi 12x)
+// Atur reward DOGE per klaim (misal setara rata-rata faucet per jam)
+const REWARD_AMOUNT = 0.1; // contoh: 0.1 DOGE
+const COOLDOWN_MINUTES = 5; 
+const REFERRAL_BONUS = 0.1; // 10%
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   const { wallet } = req.body;
   if (!wallet) {
-    return res.status(400).json({ message: "Wallet tidak boleh kosong" });
+    return res.status(400).json({ error: "Wallet address required" });
   }
 
-  // Cek history klaim user
-  const { data: lastClaim, error: fetchErr } = await supabase
-    .from("claims")
-    .select("*")
-    .eq("wallet", wallet)
-    .eq("coin", COIN)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-
-  if (fetchErr) {
-    console.error("Error fetch:", fetchErr.message);
-  }
-
-  // Cek cooldown
-  if (lastClaim) {
-    const diff = (Date.now() - new Date(lastClaim.created_at).getTime()) / 1000;
-    if (diff < COOLDOWN_MINUTES * 60) {
-      const remaining = Math.ceil(COOLDOWN_MINUTES * 60 - diff);
-      return res.status(429).json({
-        message: `⏳ Tunggu ${remaining} detik lagi untuk klaim berikutnya.`,
-      });
-    }
-  }
-
-  // Kirim reward (via FaucetPay API)
   try {
-    const fpRes = await fetch("https://faucetpay.io/api/v1/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        api_key: process.env.FAUCETPAY_API_KEY,
-        currency: COIN,
-        to: wallet,
-        amount: REWARD.toString(),
-      }),
-    });
+    // 1. Cek klaim terakhir
+    const { data: lastClaim, error: claimError } = await supabase
+      .from("claims")
+      .select("created_at")
+      .eq("wallet", wallet)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
 
-    const fpData = await fpRes.json();
-
-    if (fpData.status !== 200) {
-      return res.status(500).json({ message: "❌ Gagal mengirim reward." });
+    if (claimError && claimError.code !== "PGRST116") {
+      throw claimError;
     }
 
-    // Simpan log klaim ke Supabase
-    const { error: insertErr } = await supabase.from("claims").insert([
-      {
-        wallet,
-        coin: COIN,
-        amount: REWARD,
-      },
-    ]);
+    if (lastClaim) {
+      const lastClaimTime = new Date(lastClaim.created_at);
+      const now = new Date();
+      const diffMinutes = (now - lastClaimTime) / 1000 / 60;
 
-    if (insertErr) {
-      console.error("Insert error:", insertErr.message);
+      if (diffMinutes < COOLDOWN_MINUTES) {
+        return res.status(429).json({
+          error: `Cooldown aktif. Coba lagi dalam ${Math.ceil(
+            COOLDOWN_MINUTES - diffMinutes
+          )} menit.`,
+        });
+      }
+    }
+
+    // 2. Insert klaim baru
+    const { data: newClaim, error: insertError } = await supabase
+      .from("claims")
+      .insert([{ wallet, coin: "DOGE", amount: REWARD_AMOUNT }])
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+
+    // 3. Update saldo user
+    const { error: balanceError } = await supabase
+      .from("balances")
+      .upsert({
+        wallet,
+        balance: REWARD_AMOUNT,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "wallet" })
+      .select();
+
+    if (balanceError) throw balanceError;
+
+    // 4. Cek referral → beri bonus ke referrer
+    const { data: referral } = await supabase
+      .from("referrals")
+      .select("referrer_wallet")
+      .eq("user_wallet", wallet)
+      .single();
+
+    if (referral && referral.referrer_wallet) {
+      const bonusAmount = REWARD_AMOUNT * REFERRAL_BONUS;
+      await supabase
+        .from("balances")
+        .upsert({
+          wallet: referral.referrer_wallet,
+          balance: bonusAmount,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "wallet" });
     }
 
     return res.status(200).json({
-      message: `✅ Klaim sukses! Kamu dapat ${REWARD} ${COIN}.`,
+      success: true,
+      message: `Berhasil klaim ${REWARD_AMOUNT} DOGE`,
+      claim: newClaim,
     });
+
   } catch (err) {
-    console.error("Catch error:", err.message);
-    return res.status(500).json({ message: "❌ Error internal." });
+    console.error("Claim error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
