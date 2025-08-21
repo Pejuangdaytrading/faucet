@@ -9,12 +9,11 @@ export default async function handler(req, res) {
   }
 
   const update = req.body;
-  console.log("Incoming update:", JSON.stringify(update)); // 👈 LOG MASUK
+  console.log("Incoming update:", JSON.stringify(update, null, 2));
 
   if (update.message) {
     const chatId = update.message.chat.id;
     const text = update.message.text || "";
-    console.log("ChatId:", chatId, "Text:", text); // 👈 LOG MASUK
 
     if (text === "/start") {
       const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -32,7 +31,7 @@ export default async function handler(req, res) {
       });
 
       const result = await r.json();
-      console.log("Telegram response:", result); // 👈 LOG RESPONSE
+      console.log("Telegram response:", result);
     }
   }
 
