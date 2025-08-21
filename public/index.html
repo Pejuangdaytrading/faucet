@@ -104,19 +104,35 @@
     }, 8000);
 
     // Claim handler
-    claimBtn.addEventListener("click", () => {
-      const wallet = walletInput.value.trim();
-      if (!wallet) {
-        alert("⚠️ Masukkan alamat wallet FaucetPay dulu!");
-        return;
-      }
+claimBtn.addEventListener("click", async () => {
+  const wallet = walletInput.value.trim();
+  if (!wallet) {
+    alert("⚠️ Masukkan alamat wallet FaucetPay dulu!");
+    return;
+  }
 
-      // 🔥 Trigger Adsterra Direct Link (buka di tab baru)
-      window.open("https://www.profitableratecpm.com/qabjgu4pry?key=b3ddcd458c98b1640797a768bc984772", "_blank");
+  // 🔥 Trigger Adsterra Direct Link
+  window.open("https://www.profitableratecpm.com/qabjgu4pry?key=b3ddcd458c98b1640797a768bc984772", "_blank");
 
-      // TODO: Panggil API klaim (ke /api/claim)
-      alert("✅ Klaim berhasil! Reward akan ditransfer ke " + wallet);
+  // 🚀 Panggil API klaim
+  try {
+    const res = await fetch("/api/claim", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wallet }),
     });
+
+    const data = await res.json();
+    if (data.success) {
+      alert(data.message);
+    } else {
+      alert("❌ " + data.error);
+    }
+  } catch (err) {
+    alert("⚠️ Gagal klaim. Coba lagi.");
+  }
+});
   </script>
 </body>
 </html>
+
