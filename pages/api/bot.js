@@ -1,14 +1,13 @@
-import express from "express";
 import fetch from "node-fetch";
 
-const app = express();
-app.use(express.json());
-
-// pakai ENV di vercel untuk keamanan
 const BOT_TOKEN = process.env.BOT_TOKEN || "8042004025:AAEVVhjmp5u9MUfHUwIoYPiglS3GMT0Aaig";
 const WEBAPP_URL = "https://faucet.dailyfunhub.site";
 
-app.post("/api/bot", async (req, res) => {
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ ok: false, message: "Method not allowed" });
+  }
+
   const update = req.body;
 
   if (update.message) {
@@ -32,7 +31,5 @@ app.post("/api/bot", async (req, res) => {
     }
   }
 
-  res.sendStatus(200);
-});
-
-export default app;
+  return res.status(200).json({ ok: true });
+}
