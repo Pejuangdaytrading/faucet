@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const text = update.message.text || "";
 
     if (text === "/start") {
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -29,6 +29,9 @@ export default async function handler(req, res) {
           }
         })
       });
+
+      const tgJson = await tgRes.json();
+      console.log("Telegram response:", tgJson);
     }
   }
 
