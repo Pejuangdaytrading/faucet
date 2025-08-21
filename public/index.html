@@ -1,73 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DailyFunHub Faucet</title>
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      border: 1px solid #ccc;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      width: 300px;
-    }
-    input {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 10px 15px;
-      cursor: pointer;
-    }
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .container { border: 1px solid #ccc; padding: 20px; border-radius: 10px; text-align: center; width: 300px; }
+    input, button { width: 100%; padding: 8px; margin: 5px 0; }
+    button { cursor: pointer; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>💧 DailyFunHub Faucet</h2>
-    <input type="text" id="address" placeholder="Enter FaucetPay DOGE Address"/>
+    <input type="text" id="address" placeholder="Enter FaucetPay DOGE Address" />
     <div class="h-captcha" data-sitekey=be2ebfca-fe7e-43ba-8406-34f4e02623d2></div>
-    <br/>
     <button onclick="claimFaucet()">Claim Faucet</button>
   </div>
 
   <script>
-  async function claimFaucet() {
-    const address = document.getElementById("address").value;
-    const token = hcaptcha.getResponse();
+    async function claimFaucet() {
+      const address = document.getElementById("address").value.trim();
+      const token = hcaptcha.getResponse();
 
-    if (!address) return alert("⚠️ Please enter your FaucetPay address.");
-    if (!token) return alert("⚠️ Please complete captcha.");
+      if (!address) return alert("⚠️ Please enter your FaucetPay address.");
+      if (!token) return alert("⚠️ Please complete captcha.");
 
-    try {
-      const res = await fetch("/api/claim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address, token }),
-      });
+      try {
+        const res = await fetch("/api/claim", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address, token })
+        });
+        const data = await res.json();
 
-      const data = await res.json();
-
-      if (data.success) {
-        // 🔑 gunakan pesan dari backend kalau ada
-        alert(`✅ ${data.message || "DOGE sent!"}`);
-      } else {
-        alert(`❌ ${data.error || "Claim failed."}`);
+        if (data.success) {
+          alert(`✅ ${data.message}`);
+        } else {
+          alert(`❌ ${data.message || "Claim failed."}`);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("❌ Network error, please try again.");
       }
-    } catch (err) {
-      console.error(err);
-      alert("❌ An error occurred. Please try again.");
     }
-  }
   </script>
 </body>
 </html>
