@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, message: "Captcha verification failed" });
     }
 
-    // ✅ Call FaucetPay API
+    // ✅ FaucetPay API
     const faucetResponse = await fetch("https://faucetpay.io/api/v1/send", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -33,27 +33,31 @@ export default async function handler(req, res) {
         api_key: process.env.FAUCETPAY_API_KEY,
         currency: "DOGE",
         to: address,
-        amount: "0.0001" // contoh, nanti bisa di-randomize sesuai kebutuhan
+        amount: "0.0001" // contoh
       })
     });
 
     const result = await faucetResponse.json();
-    console.log("FaucetPay Response:", result); // ✅ debug log ke Vercel
+    console.log("🔍 FaucetPay API Response:", result); // <--- cek di Vercel log
 
+    // ✅ Tangkap sukses
     if (result.status === 200) {
-      const amount = result.amount || result.payout || result.value || "0";
+      const amount = result.amount || result.payout || result.sentAmount || "0.1";
       const currency = result.currency || "DOGE";
+      const message = result.message || "Claim successful";
 
       return res.status(200).json({
         success: true,
-        message: `✅ Claim successful: ${amount} ${currency} sent!`
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: result.message || "FaucetPay error"
+        message: `✅ ${message}: ${amount} ${currency} sent!`
       });
     }
+
+    // ❌ Tangkap gagal (tampilkan pesan asli)
+    return res.status(400).json({
+      success: false,
+      message: result.message || "FaucetPay error"
+    });
+
   } catch (error) {
     console.error("Claim error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
