@@ -22,6 +22,8 @@ export default async function handler(req, res) {
     });
     const captchaData = await captchaRes.json();
 
+    console.log("🔎 hCaptcha result:", captchaData);
+
     if (!captchaData.success) {
       return res.status(400).json({ error: "Captcha verification failed", detail: captchaData });
     }
@@ -35,11 +37,13 @@ export default async function handler(req, res) {
         api_key: apiKey,
         currency: "DOGE",
         to: address,
-        amount: "0.5", // test kecil dulu
+        amount: "0.5", // coba kecil dulu
       }),
     });
 
     const payoutData = await payoutRes.json();
+
+    console.log("💸 FaucetPay result:", payoutData);
 
     if (payoutData.status === 200) {
       return res.json({ success: true, message: `Sent 0.5 DOGE to ${address}` });
@@ -48,7 +52,7 @@ export default async function handler(req, res) {
     }
 
   } catch (err) {
-    console.error("Claim error:", err);
-    return res.status(500).json({ error: "Server error" });
+    console.error("🔥 Claim error:", err);
+    return res.status(500).json({ error: "Server error", detail: err.message });
   }
 }
