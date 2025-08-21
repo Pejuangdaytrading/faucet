@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   const captchaResult = await captchaVerify.json();
 
   if (!captchaResult.success) {
-    return res.status(400).json({ error: "Captcha verification failed" });
+    return res.status(400).json({ error: "Captcha verification failed", detail: captchaResult });
   }
 
   // 2. Kirim Payment FaucetPay
@@ -31,14 +31,14 @@ export default async function handler(req, res) {
         api_key: process.env.FAUCETPAY_API_KEY,
         currency: "DOGE",
         to: address,
-        amount: "0.009521"  // contoh payout 0.1 DOGE
+        amount: "0.1"
       }),
     });
 
     const fpData = await fpRes.json();
 
     if (fpData.status === 200) {
-      return res.status(200).json({ success: true, message: "✅ DOGE sent successfully!" });
+      return res.status(200).json({ success: true, message: "✅ DOGE sent successfully!", faucetpay: fpData });
     } else {
       return res.status(400).json({ error: "FaucetPay Error", detail: fpData });
     }
