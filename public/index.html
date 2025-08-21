@@ -1,28 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>DailyFunHub Faucet</title>
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 </head>
 <body>
-  <h2>🚰 DailyFunHub Faucet</h2>
-  <form id="faucet-form">
-    <input type="text" id="wallet" placeholder="Enter FaucetPay Wallet Address" required />
-    <div class="h-captcha" data-sitekey="be2ebfca-fe7e-43ba-8406-34f4e02623d2"></div>
-    <button type="submit">Claim Faucet</button>
-  </form>
+  <h2>DailyFunHub Faucet</h2>
+
+  <input type="text" id="wallet" placeholder="Enter your DOGE address"><br><br>
+
+  <div class="h-captcha" data-sitekey="be2ebfca-fe7e-43ba-8406-34f4e02623d2"></div><br>
+
+  <button onclick="claim()">Claim Faucet</button>
 
   <script>
-    document.getElementById("faucet-form").addEventListener("submit", async function (e) {
-      e.preventDefault(); // cegah reload halaman
+    async function claim() {
+      const address = document.getElementById("wallet").value;
+      const token = document.querySelector('[name="h-captcha-response"]').value;
 
-      const wallet = document.getElementById("wallet").value;
-      const hcaptcha = document.querySelector("[name='h-captcha-response']").value;
-
-      if (!wallet || !hcaptcha) {
-        alert("⚠️ Please enter wallet and complete captcha");
+      if (!address || !token) {
+        alert("Missing address or captcha token");
         return;
       }
 
@@ -30,22 +28,19 @@
         const res = await fetch("/api/claim", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            address: wallet,
-            "h-captcha-response": hcaptcha,
-          }),
+          body: JSON.stringify({ address, token })
         });
 
         const data = await res.json();
         if (data.success) {
-          alert("✅ " + data.message);
+          alert("✅ Claim successful: " + data.payout + " DOGE sent!");
         } else {
-          alert("❌ " + (data.error || "Unknown error"));
+          alert("❌ " + data.error);
         }
       } catch (err) {
-        alert("🚨 Request failed: " + err.message);
+        alert("Server error: " + err.message);
       }
-    });
+    }
   </script>
 </body>
 </html>
