@@ -1,0 +1,13 @@
+{
+  name faucet-miniapp,
+  version 1.0.0,
+  main index.js,
+  type module,
+  scripts {
+    dev vercel dev,
+    start vercel dev
+  },
+  dependencies {
+    node-fetch ^3.3.2
+  }
+}
