@@ -38,19 +38,17 @@ const response = await fetch("https://faucetpay.io/api/v1/send", {
 
     const fpData = await fpRes.json();
 
-    if (fpData.status === 200) {
-      return res.status(200).json({
+    if (result.status === 200) {
+    return res.status(200).json({
         success: true,
-        message: "Claim successful",
-        amount: amountToSend,
-        currency: "DOGE"
-      });
-    } else {
-      return res.status(400).json({
+        message: `Claim successful: ${amount} DOGE sent!`
+    });
+} else {
+    return res.status(400).json({
         success: false,
-        message: fpData.message || "FaucetPay error"
-      });
-    }
+        message: result.message || "Error sending payment"
+    });
+}
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
