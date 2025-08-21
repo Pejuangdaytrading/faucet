@@ -1,12 +1,15 @@
+// pages/api/claim.js
+import fetch from "node-fetch";
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ success: false, message: "Method Not Allowed" });
+    return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
   const { address, captchaToken } = req.body;
 
-  if (!address) {
-    return res.status(400).json({ success: false, message: "Wallet address required" });
+  if (!address || !captchaToken) {
+    return res.status(400).json({ success: false, message: "Missing parameters" });
   }
 
   try {
@@ -14,46 +17,42 @@ export default async function handler(req, res) {
     const captchaVerify = await fetch("https://hcaptcha.com/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        secret: process.env.HCAPTCHA_SECRET,
-        response: captchaToken,
-      }),
+      body: `secret=${process.env.HCAPTCHA_SECRET}&response=${captchaToken}`,
     });
 
     const captchaResult = await captchaVerify.json();
+
     if (!captchaResult.success) {
-      return res.status(400).json({ success: false, message: "Captcha failed" });
+      return res.status(400).json({ success: false, message: "Captcha verification failed" });
     }
 
-    // 2. Call FaucetPay API
-    const fpResponse = await fetch("https://faucetpay.io/api/v1/send", {
+    // 2. FaucetPay API payout
+    const payoutResponse = await fetch("https://faucetpay.io/api/v1/send", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
         api_key: process.env.FAUCETPAY_API_KEY,
-        amount: 0.1,              // 👉 nominal reward (misal 0.1 DOGE)
-        currency: "DOGE",
+        amount: "0.05", // jumlah DOGE per claim (atur sesuai saldo)
         to: address,
+        currency: "DOGE",
       }),
     });
 
-    const fpData = await fpResponse.json();
+    const payoutData = await payoutResponse.json();
 
-    if (fpData.status === 200) {
-      return res.json({
+    if (payoutData.status === 200) {
+      return res.status(200).json({
         success: true,
-        message: "✅ Claim berhasil dikirim",
-        tx: fpData,
+        message: `Payment sent! TX ID: ${payoutData.transactionId || "Check FaucetPay Dashboard"}`,
       });
     } else {
-      return res.json({
+      return res.status(400).json({
         success: false,
-        message: fpData.message || "FaucetPay error",
+        message: payoutData.message || "FaucetPay error",
       });
     }
-
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error("Claim error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 }
