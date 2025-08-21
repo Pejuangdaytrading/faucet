@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Faucet DailyFunHub</title>
+  <title>DailyFunHub Faucet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Monetag SDK -->
@@ -15,25 +15,118 @@
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 40px; }
-    #claimBtn { padding: 10px 20px; font-size: 18px; background: green; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    #claimBtn:disabled { background: gray; cursor: not-allowed; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f9fc;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background: #1d4ed8;
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    .h-captcha {
+      margin: 10px auto;
+    }
+    button {
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      background: #22c55e;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background: #16a34a;
+    }
+    #status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+    footer {
+      background: #f3f4f6;
+      text-align: center;
+      padding: 10px;
+    }
+    .ad-banner {
+      margin: 15px 0;
+    }
+    .ad-banner iframe {
+      width: 100%;
+      height: 90px;
+      border: none;
+    }
   </style>
 </head>
 <body>
-  <h1>🚰 DailyFunHub Faucet</h1>
-  <p>Claim free <b>DOGE</b> every <b>5 minutes</b>!</p>
+  <header>
+    <h1>🚰 DailyFunHub Faucet</h1>
+    <p>Claim free <b>DOGE</b> every <b>5 minutes</b></p>
+  </header>
 
-  <input id="wallet" type="text" placeholder="Enter FaucetPay Wallet Address" style="width:80%; padding:10px;">
-  <br><br>
+  <main>
+    <div class="card">
+      <input id="wallet" type="text" placeholder="Enter FaucetPay Wallet Address">
 
-  <!-- Captcha widget -->
-  <div class="h-captcha" data-sitekey="YOUR_HCAPTCHA_SITE_KEY"></div>
-  <br>
+      <!-- hCaptcha -->
+      <div class="h-captcha" data-sitekey="be2ebfca-fe7e-43ba-8406-34f4e02623d2"></div>
 
-  <button id="claimBtn" onclick="watchAd()">🎁 Claim Faucet</button>
+      <button id="claimBtn" onclick="watchAd()">🎁 Claim Faucet</button>
 
-  <p id="status"></p>
+      <p id="status"></p>
+
+      <!-- 🔹 Banner Ads Slot -->
+      <div class="ad-banner">
+        <!-- Bisa ganti dengan kode banner Monetag / Adsterra -->
+        <iframe src="https://via.placeholder.com/320x90?text=Your+Banner+Ad+Here"></iframe>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <small>&copy; 2025 DailyFunHub Faucet</small>
+  </footer>
 
 <script>
 let canClaim = false;
