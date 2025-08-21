@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DailyFunHub Faucet</title>
+
+  <!-- Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Monetag SDK -->
+  <script src='//libtl.com/sdk.js' data-zone='9748411' data-sdk='show_9748411'></script>
+
+  <!-- Adsterra Social Bar -->
+  <script type='text/javascript' src='//pl27468110.profitableratecpm.com/a6/68/b0/a668b013958e55610215c3779c508f5e.js'></script>
+
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #1669c1;
+      --bg: #f4f8ff;
+      --text: #333;
+      --muted: #666;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      animation: fadeIn 0.6s ease;
+      text-align: center;
+    }
+    h1 {
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-size: 1.6rem;
+    }
+    p.desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover:enabled {
+      background: var(--primary-dark);
+    }
+    button:disabled {
+      background: #bbb;
+      cursor: not-allowed;
+    }
+    .note {
+      margin-top: 15px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .note a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .note a:hover {
+      text-decoration: underline;
+    }
+    .ads {
+      margin: 20px 0;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    @media (max-width: 480px) {
+      .container {
+        border-radius: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚰 DailyFunHub Faucet</h1>
+    <p class="desc">
+      Claim free <b>DOGE</b> every <b>5 minutes</b>.<br/>
+      Get faster rewards than normal faucets ⏱️
+    </p>
+
+    <input type="text" id="wallet" placeholder="Enter your FaucetPay wallet address" />
+
+    <div class="ads">
+      🔒 Please wait until the ad loads before claiming...
+    </div>
+
+    <button id="claimBtn" disabled>Claim Now</button>
+
+    <div class="note">
+      Don’t have a FaucetPay wallet? 👉 
+      <a href="https://faucetpay.io/?r=37006" target="_blank">Create one here</a>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const claimBtn = document.getElementById("claimBtn");
+    const walletInput = document.getElementById("wallet");
+
+    // Auto placeholder if opened from Telegram MiniApp
+    const userData = tg.initDataUnsafe?.user;
+    if (userData) {
+      walletInput.placeholder = `Wallet (Telegram: ${userData.username || userData.id})`;
+    }
+
+    // Enable claim button after 8s (ads view)
+    setTimeout(() => {
+      claimBtn.disabled = false;
+    }, 8000);
+
+    // Handle claim
+    claimBtn.addEventListener("click", async () => {
+      const wallet = walletInput.value.trim();
+      if (!wallet) {
+        alert("⚠️ Please enter your FaucetPay wallet address!");
+        return;
+      }
+
+      // 🔥 Open Adsterra Direct Link
+      window.open("https://www.profitableratecpm.com/qabjgu4pry?key=b3ddcd458c98b1640797a768bc984772", "_blank");
+
+      try {
+        const res = await fetch("/api/claim", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message);
+        } else {
+          alert("❌ " + data.error);
+        }
+      } catch (err) {
+        alert("⚠️ Claim failed. Try again later.");
+      }
+    });
+  </script>
+</body>
+</html>
