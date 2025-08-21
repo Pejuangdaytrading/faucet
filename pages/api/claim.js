@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         api_key: process.env.FAUCETPAY_API_KEY,
-        amount: "0.05", // jumlah DOGE per claim (atur sesuai saldo)
+        amount: "0.000967", // jumlah DOGE per claim (atur sesuai saldo)
         to: address,
         currency: "DOGE",
       }),
