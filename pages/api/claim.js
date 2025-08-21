@@ -10,14 +10,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { wallet, amount } = req.body;
+  const { wallet, amount, ref } = req.body;
   if (!wallet || !amount) {
     return res.status(400).json({ error: "Wallet and amount required" });
   }
 
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-  // cek klaim terakhir dari IP / wallet
+  // cek klaim terakhir (cooldown 10 menit)
   const { data: lastClaims } = await supabase
     .from("claims")
     .select("*")
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // kirim ke faucetpay
+    // kirim reward ke FaucetPay
     const response = await fetch("https://faucetpay.io/api/v1/send", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -49,12 +49,33 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // simpan log ke supabase kalau sukses
     if (data.status === 200) {
+      // log klaim
       await supabase.from("claims").insert([{ wallet, ip }]);
+
+      // cek referral
+      if (ref) {
+        const { data: exists } = await supabase
+          .from("referrals")
+          .select("*")
+          .eq("user_wallet", wallet)
+          .maybeSingle();
+
+        if (!exists) {
+          await supabase.from("referrals").insert([{ user_wallet: wallet, referrer_wallet: ref }]);
+          // kasih bonus ke referrer
+          await supabase.rpc("increment_balance", { w: ref, amt: 1 }); // contoh bonus 1 satoshi
+        }
+      }
+
+      // update saldo internal
+      await supabase
+        .from("balances")
+        .upsert([{ wallet, balance: amount, updated_at: new Date().toISOString() }], { onConflict: "wallet" });
     }
 
     return res.status(200).json(data);
+
   } catch (err) {
     return res.status(500).json({ error: "Server error", details: err.message });
   }
