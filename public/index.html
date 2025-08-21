@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DailyFunHub Faucet</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    input { padding: 10px; width: 300px; }
+    button { padding: 10px 20px; margin-top: 10px; cursor: pointer; }
+    #result { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>🚰 DailyFunHub Faucet</h1>
+  <p>Masukkan alamat wallet FaucetPay kamu untuk klaim reward gratis.</p>
+  
+  <input type="text" id="wallet" placeholder="Wallet Address FaucetPay" />
+  <button onclick="claim()">Claim Now</button>
+  <p id="result"></p>
+
+  <script>
+    async function claim() {
+      const wallet = document.getElementById("wallet").value;
+      if (!wallet) {
+        alert("⚠️ Masukkan alamat wallet dulu!");
+        return;
+      }
+
+      // Request klaim ke backend
+      const res = await fetch("/api/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet, amount: 2 }) // default reward 2 (misal satoshi DOGE)
+      });
+
+      const data = await res.json();
+      document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
