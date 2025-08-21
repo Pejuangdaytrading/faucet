@@ -110,14 +110,26 @@
       }
 
       const res = await fetch("/api/claim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address, "h-captcha-response": token })
-      });
-
-      const data = await res.json();
-      alert(data.message || "Unknown error");
-    });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    address: wallet,
+    "h-captcha-response": hcaptcha,
+  }),
+})
+  .then((res) => res.json())
+  .then((data) => {
+    console.log("API Response:", data); // log detail ke console browser
+    if (data.success) {
+      alert(data.message);
+    } else {
+      alert("❌ Error: " + (data.error || "Unknown") + "\nDetail: " + JSON.stringify(data.detail));
+    }
+  })
+  .catch((err) => {
+    alert("🚨 Request failed: " + err.message);
+  });
   </script>
 </body>
 </html>
+
