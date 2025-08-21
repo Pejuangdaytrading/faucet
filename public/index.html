@@ -92,15 +92,29 @@
     <h2>💎 DailyFunHub Faucet</h2>
     <p>Claim free DOGE every 5 minutes</p>
 
-    <form id="faucetForm">
-      <input type="text" id="wallet" placeholder="Enter FaucetPay Wallet Address" required />
+    <form id="faucet-form" method="POST">
+  <input type="text" name="address" placeholder="Enter FaucetPay Wallet Address" required />
+  <div class="h-captcha" data-sitekey="be2ebfca-fe7e-43ba-8406-34f4e02623d2"></div>
+  <button type="submit">🎁 Claim Faucet</button>
+</form>
 
-      <!-- hCaptcha -->
-      <div class="h-captcha" data-sitekey="be2ebfca-fe7e-43ba-8406-34f4e02623d2"></div>
+<script>
+document.getElementById("faucet-form").addEventListener("submit", async function(e) {
+  e.preventDefault();
 
-      <button type="submit">🎁 Claim Faucet</button>
-    </form>
+  const address = this.address.value;
+  const token = document.querySelector("[name='h-captcha-response']").value;
 
+  const res = await fetch("/api/claim", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ address, "h-captcha-response": token }),
+  });
+
+  const data = await res.json();
+  alert(data.message || "Unknown error");
+});
+</script>
     <div id="result"></div>
 
     <!-- Ads Banner -->
@@ -162,3 +176,4 @@
   </script>
 </body>
 </html>
+
