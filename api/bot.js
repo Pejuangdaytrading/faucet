@@ -5,18 +5,18 @@ const WEBAPP_URL = "https://faucet.dailyfunhub.site";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ ok: false, message: "Method not allowed" });
+    return res.status(200).json({ ok: true });
   }
 
   const update = req.body;
-  console.log("Incoming update:", JSON.stringify(update, null, 2));
+  console.log("Incoming update:", JSON.stringify(update));
 
   if (update.message) {
     const chatId = update.message.chat.id;
     const text = update.message.text || "";
 
     if (text === "/start") {
-      const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -29,9 +29,6 @@ export default async function handler(req, res) {
           }
         })
       });
-
-      const result = await r.json();
-      console.log("Telegram response:", result);
     }
   }
 
