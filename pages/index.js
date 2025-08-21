@@ -1,7 +1,9 @@
+import Head from "next/head";
+
 export default function Home() {
   return (
-    <html>
-      <head>
+    <>
+      <Head>
         <title>DailyFunHub Faucet</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         {/* Monetag SDK */}
@@ -10,16 +12,19 @@ export default function Home() {
         <script type="text/javascript" src="//pl27468110.profitableratecpm.com/a6/68/b0/a668b013958e55610215c3779c508f5e.js"></script>
         {/* Telegram Mini Apps SDK */}
         <script src="https://telegram.org/js/telegram-web-app.js"></script>
-      </head>
-      <body style={{ fontFamily: "Arial, sans-serif", textAlign: "center", padding: "30px" }}>
+      </Head>
+
+      <main style={{ fontFamily: "Arial, sans-serif", textAlign: "center", padding: "30px" }}>
         <h1>🚀 DailyFunHub Faucet</h1>
         <p>Claim free <b>DOGE</b> every 5 minutes! 🔥</p>
+
         <input
           id="wallet"
           placeholder="Enter your FaucetPay wallet address"
           style={{ padding: "10px", width: "80%", marginBottom: "10px" }}
         />
         <br />
+
         <button
           onClick={() => {
             const wallet = document.getElementById("wallet").value;
@@ -30,7 +35,7 @@ export default function Home() {
             })
               .then(res => res.json())
               .then(data => alert(data.message || "Claim Success!"))
-              .catch(() => alert("⚠️ Gagal klaim. Coba lagi."));
+              .catch(() => alert("⚠️ Claim failed. Try again."));
           }}
           style={{
             padding: "10px 20px",
@@ -43,7 +48,9 @@ export default function Home() {
         >
           💰 Claim Faucet
         </button>
+
         <br /><br />
+
         <a
           href="https://faucetpay.io/?r=37006"
           target="_blank"
@@ -51,7 +58,7 @@ export default function Home() {
         >
           🔐 Create FaucetPay Wallet
         </a>
-      </body>
-    </html>
+      </main>
+    </>
   );
 }
