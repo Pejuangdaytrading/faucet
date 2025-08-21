@@ -1,82 +1,45 @@
-import { createClient } from "@supabase/supabase-js";
+const adsterraDirect = "https://www.profitableratecpm.com/qabjgu4pry?key=b3ddcd458c98b1640797a768bc984772";
+let lastClaimTime = 0;
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+document.getElementById("claimBtn").addEventListener("click", async () => {
+  const wallet = document.getElementById("wallet").value.trim();
+  const now = Date.now();
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  // cek wallet
+  if (!wallet) {
+    document.getElementById("result").innerText = "⚠️ Masukkan alamat wallet FaucetPay DOGE!";
+    return;
   }
 
-  const { wallet, amount, ref } = req.body;
-  if (!wallet || !amount) {
-    return res.status(400).json({ error: "Wallet and amount required" });
+  // cek cooldown 5 menit
+  if (now - lastClaimTime < 5 * 60 * 1000) {
+    const remaining = Math.ceil((5 * 60 * 1000 - (now - lastClaimTime)) / 1000);
+    document.getElementById("result").innerText = `⏳ Tunggu ${remaining} detik lagi sebelum claim berikutnya.`;
+    return;
   }
 
-  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  // 1. Buka Adsterra Direct Link
+  window.open(adsterraDirect, "_blank");
 
-  // cek klaim terakhir (cooldown 10 menit)
-  const { data: lastClaims } = await supabase
-    .from("claims")
-    .select("*")
-    .or(`wallet.eq.${wallet},ip.eq.${ip}`)
-    .order("created_at", { ascending: false })
-    .limit(1);
+  // 2. Trigger Monetag SDK ads
+  if (typeof show_9748411 !== "undefined") {
+    show_9748411();
+  }
 
-  const cooldown = 10 * 60 * 1000; // 10 menit
-  if (lastClaims && lastClaims.length > 0) {
-    const lastClaim = new Date(lastClaims[0].created_at).getTime();
-    if (Date.now() - lastClaim < cooldown) {
-      const sisa = Math.ceil((cooldown - (Date.now() - lastClaim)) / 1000);
-      return res.status(429).json({ error: `Tunggu ${sisa} detik sebelum klaim lagi.` });
+  // 3. Delay biar iklan tampil
+  setTimeout(async () => {
+    try {
+      const res = await fetch("/api/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet, coin: "DOGE" })
+      });
+
+      const data = await res.json();
+      document.getElementById("result").innerText = data.message || "✅ Claim sukses!";
+      lastClaimTime = Date.now();
+    } catch (err) {
+      document.getElementById("result").innerText = "❌ Error claim. Coba lagi.";
     }
-  }
-
-  try {
-    // kirim reward ke FaucetPay
-    const response = await fetch("https://faucetpay.io/api/v1/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        api_key: process.env.FAUCETPAY_API_KEY,
-        currency: "DOGE",
-        amount: amount,
-        to: wallet
-      })
-    });
-
-    const data = await response.json();
-
-    if (data.status === 200) {
-      // log klaim
-      await supabase.from("claims").insert([{ wallet, ip }]);
-
-      // cek referral
-      if (ref) {
-        const { data: exists } = await supabase
-          .from("referrals")
-          .select("*")
-          .eq("user_wallet", wallet)
-          .maybeSingle();
-
-        if (!exists) {
-          await supabase.from("referrals").insert([{ user_wallet: wallet, referrer_wallet: ref }]);
-          // kasih bonus ke referrer
-          await supabase.rpc("increment_balance", { w: ref, amt: 1 }); // contoh bonus 1 satoshi
-        }
-      }
-
-      // update saldo internal
-      await supabase
-        .from("balances")
-        .upsert([{ wallet, balance: amount, updated_at: new Date().toISOString() }], { onConflict: "wallet" });
-    }
-
-    return res.status(200).json(data);
-
-  } catch (err) {
-    return res.status(500).json({ error: "Server error", details: err.message });
-  }
-}
+  }, 5000); // tunggu 5 detik
+});
