@@ -45,13 +45,16 @@
     }
 
     input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      font-size: 14px;
-    }
+  width: 90%;               /* kasih jarak dari kiri-kanan */
+  max-width: 320px;         /* batasi supaya gak terlalu lebar */
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  margin: 0 auto 15px auto; /* auto center */
+  display: block;           /* wajib untuk bisa auto center */
+  font-size: 14px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.15);
+  }
 
     .captcha {
       margin: 15px 0;
@@ -129,3 +132,4 @@
   <script type='text/javascript' src='//pl27468110.profitableratecpm.com/a6/68/b0/a668b013958e55610215c3779c508f5e.js'></script>
 </body>
 </html>
+
