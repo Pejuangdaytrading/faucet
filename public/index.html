@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DailyFunHub Faucet</title>
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-    .container { display: inline-block; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
-    input { padding: 8px; width: 250px; margin: 10px 0; }
-    button { padding: 8px 15px; cursor: pointer; }
+    .container { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
+    input { width: 90%; padding: 10px; margin: 10px 0; }
+    button { padding: 10px 20px; cursor: pointer; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>💧 DailyFunHub Faucet</h2>
-    <input type="text" id="address" placeholder="Enter FaucetPay DOGE Address"/>
-    <div class="h-captcha" data-sitekey=be2ebfca-fe7e-43ba-8406-34f4e02623d2></div>
+    <input type="text" id="address" placeholder=be2ebfca-fe7e-43ba-8406-34f4e02623d2/>
+    <div class="h-captcha" data-sitekey="YOUR_HCAPTCHA_SITE_KEY"></div>
     <br/>
     <button onclick="claimFaucet()">Claim Faucet</button>
   </div>
@@ -35,19 +35,18 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ address, token })
         });
+
         const data = await res.json();
 
         if (data.success) {
-          alert(`✅ Claim successful: ${data.amount} ${data.currency} sent!`);
+          alert(`✅ ${data.message}`);
         } else {
           alert(`❌ ${data.message}`);
         }
       } catch (err) {
-        alert("❌ Error: " + err.message);
+        alert("⚠️ Network error, please try again.");
       }
     }
   </script>
 </body>
 </html>
-
-
