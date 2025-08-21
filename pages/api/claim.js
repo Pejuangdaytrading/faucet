@@ -14,13 +14,11 @@ export default async function handler(req, res) {
   console.log("📩 Incoming request:", req.method, req.body);
 
   if (req.method !== "POST") {
-    console.warn("⚠️ Method not allowed:", req.method);
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
   const { wallet } = req.body || {};
   if (!wallet) {
-    console.warn("⚠️ Missing wallet in request");
     return res.status(400).json({ error: "Wallet address required" });
   }
 
@@ -32,11 +30,11 @@ export default async function handler(req, res) {
       .eq("wallet", wallet)
       .order("created_at", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();   // ✅ ganti .single() → .maybeSingle()
 
-    if (lastErr && lastErr.code !== "PGRST116") {
-      console.error("❌ Supabase select error:", lastErr.message);
-      throw lastErr;
+    if (lastErr) {
+      console.error("❌ Supabase select error:", lastErr);
+      return res.status(500).json({ error: "DB error on claim check", detail: lastErr.message });
     }
 
     if (lastClaim) {
@@ -44,7 +42,6 @@ export default async function handler(req, res) {
       const diffMinutes = (Date.now() - lastTime.getTime()) / (1000 * 60);
 
       if (diffMinutes < COOLDOWN_MINUTES) {
-        console.log(`⏳ Cooldown active for wallet ${wallet}`);
         return res.status(429).json({
           error: `Cooldown active. Wait ${Math.ceil(
             COOLDOWN_MINUTES - diffMinutes
@@ -55,15 +52,11 @@ export default async function handler(req, res) {
 
     // Insert new claim
     const { error: insertErr } = await supabase.from("claims").insert([
-      {
-        wallet,
-        coin: COIN,
-        amount: REWARD,
-      },
+      { wallet, coin: COIN, amount: REWARD }
     ]);
     if (insertErr) {
-      console.error("❌ Insert claim error:", insertErr.message);
-      throw insertErr;
+      console.error("❌ Insert claim error:", insertErr);
+      return res.status(500).json({ error: "DB error on claim insert", detail: insertErr.message });
     }
 
     // Update balance
@@ -71,11 +64,11 @@ export default async function handler(req, res) {
       .from("balances")
       .select("balance")
       .eq("wallet", wallet)
-      .single();
+      .maybeSingle();   // ✅ aman kalau tidak ada row
 
-    if (balErr && balErr.code !== "PGRST116") {
-      console.error("❌ Balance select error:", balErr.message);
-      throw balErr;
+    if (balErr) {
+      console.error("❌ Balance select error:", balErr);
+      return res.status(500).json({ error: "DB error on balance check", detail: balErr.message });
     }
 
     if (existing) {
@@ -85,16 +78,16 @@ export default async function handler(req, res) {
         .update({ balance: newBalance })
         .eq("wallet", wallet);
       if (updErr) {
-        console.error("❌ Balance update error:", updErr.message);
-        throw updErr;
+        console.error("❌ Balance update error:", updErr);
+        return res.status(500).json({ error: "DB error on balance update", detail: updErr.message });
       }
     } else {
       const { error: insBalErr } = await supabase
         .from("balances")
         .insert([{ wallet, balance: REWARD }]);
       if (insBalErr) {
-        console.error("❌ Balance insert error:", insBalErr.message);
-        throw insBalErr;
+        console.error("❌ Balance insert error:", insBalErr);
+        return res.status(500).json({ error: "DB error on balance insert", detail: insBalErr.message });
       }
     }
 
@@ -105,10 +98,11 @@ export default async function handler(req, res) {
       wallet,
       coin: COIN,
       amount: REWARD,
-      message: `✅ Successfully claimed ${REWARD} ${COIN}`,
+      message: `✅ Successfully claimed ${REWARD} ${COIN}`
     });
+
   } catch (err) {
-    console.error("🔥 Unexpected error:", err.message || err);
+    console.error("🔥 Unexpected error:", err);
     return res.status(500).json({
       error: "Internal Server Error",
       detail: err.message || String(err),
