@@ -1,36 +1,37 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({ success: false, error: "Method not allowed" });
+  }
+
+  const { address, token } = req.body;
+
+  if (!address || !token) {
+    return res.status(400).json({ success: false, error: "Missing parameters" });
   }
 
   try {
-    const { address, token } = req.body;
-
-    if (!address || !token) {
-      return res.status(400).json({ error: "Missing parameters" });
-    }
-
-    // ✅ Verify hCaptcha
+    // Verifikasi hCaptcha
     const captchaRes = await fetch("https://hcaptcha.com/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `response=${token}&secret=${process.env.HCAPTCHA_SECRET}`,
     });
+
     const captchaData = await captchaRes.json();
     if (!captchaData.success) {
-      return res.status(400).json({ error: "Captcha verification failed" });
+      return res.status(400).json({ success: false, error: "Captcha verification failed" });
     }
 
-    // ✅ Random payment
-    const min = 50;   // satoshi DOGE
-    const max = 200;  // satoshi DOGE
-    const amount = (Math.floor(Math.random() * (max - min + 1)) + min) / 100000000;
-
-    // ✅ FaucetPay API call
+    // Kirim ke FaucetPay API
     const fpRes = await fetch("https://faucetpay.io/api/v1/send", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `api_key=${process.env.FAUCETPAY_API_KEY}&currency=DOGE&amount=${amount}&to=${address}`,
+      body: new URLSearchParams({
+        api_key: process.env.FAUCETPAY_API_KEY,
+        currency: "DOGE",
+        to: address,
+        amount: (Math.floor(Math.random() * 100) + 1) / 100000000, // random kecil
+      }),
     });
 
     const fpData = await fpRes.json();
@@ -38,16 +39,15 @@ export default async function handler(req, res) {
     if (fpData.status === 200) {
       return res.status(200).json({
         success: true,
-        amount: amount,
-        currency: "DOGE",
-        message: `Claim successful: ${amount} DOGE sent!`
+        message: `Claim successful: ${fpData.amount} ${fpData.currency} sent!`,
+        amount: fpData.amount,
+        currency: fpData.currency
       });
     } else {
-      return res.status(400).json({ error: fpData.message || "FaucetPay error" });
+      return res.status(400).json({ success: false, error: fpData.message || "FaucetPay error" });
     }
-
   } catch (err) {
-    console.error("Error:", err);
-    return res.status(500).json({ error: "Internal Server Error" });
+    console.error(err);
+    return res.status(500).json({ success: false, error: "Internal server error" });
   }
 }
