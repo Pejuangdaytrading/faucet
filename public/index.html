@@ -2,40 +2,69 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>DailyFunHub Faucet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DailyFunHub Faucet - Free DOGE</title>
+
+  <!-- Adsterra Social Bar -->
+  <script type='text/javascript' src='//pl27468110.profitableratecpm.com/a6/68/b0/a668b013958e55610215c3779c508f5e.js'></script>
+
+  <!-- Monetag SDK -->
+  <script src='//libtl.com/sdk.js' data-zone='9748411' data-sdk='show_9748411'></script>
+
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-    input { padding: 10px; width: 300px; }
-    button { padding: 10px 20px; margin-top: 10px; cursor: pointer; }
-    #result { margin-top: 20px; font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #0d1117;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { color: #00c4ff; }
+    input, button {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+    }
+    input {
+      width: 300px;
+      max-width: 100%;
+    }
+    button {
+      background: #00c4ff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #result { margin-top: 15px; }
+    .affiliate {
+      margin-top: 20px;
+    }
+    .affiliate a {
+      color: #ffcc00;
+      text-decoration: none;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <h1>🚰 DailyFunHub Faucet</h1>
-  <p>Masukkan alamat wallet FaucetPay kamu untuk klaim reward gratis.</p>
-  
-  <input type="text" id="wallet" placeholder="Wallet Address FaucetPay" />
-  <button onclick="claim()">Claim Now</button>
-  <p id="result"></p>
+  <h1>🚰 DailyFunHub DOGE Faucet</h1>
+  <p>Klaim <strong>DOGE gratis</strong> setiap 5 menit sekali!</p>
+  <p>Reward setara klaim faucet lain 1 jam, tapi bisa kamu klaim tiap 5 menit.</p>
 
-  <script>
-    async function claim() {
-      const wallet = document.getElementById("wallet").value;
-      if (!wallet) {
-        alert("⚠️ Masukkan alamat wallet dulu!");
-        return;
-      }
+  <input id="wallet" type="text" placeholder="Alamat Wallet FaucetPay (DOGE)">
+  <button id="claimBtn">Claim DOGE Now</button>
+  <div id="result"></div>
 
-      // Request klaim ke backend
-      const res = await fetch("/api/claim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wallet, amount: 2 }) // default reward 2 (misal satoshi DOGE)
-      });
+  <div class="affiliate">
+    Belum punya wallet FaucetPay? 👉 
+    <a href="https://faucetpay.io/?r=37006" target="_blank">Buat Wallet FaucetPay Gratis</a>
+  </div>
 
-      const data = await res.json();
-      document.getElementById("result").innerText = JSON.stringify(data, null, 2);
-    }
-  </script>
+  <script src="/claim.js"></script>
 </body>
 </html>
