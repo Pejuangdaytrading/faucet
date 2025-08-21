@@ -5,6 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DailyFunHub Faucet</title>
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      width: 300px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 15px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -16,32 +41,33 @@
   </div>
 
   <script>
-    async function claimFaucet() {
-      const address = document.getElementById("address").value;
-      const token = hcaptcha.getResponse();
+  async function claimFaucet() {
+    const address = document.getElementById("address").value;
+    const token = hcaptcha.getResponse();
 
-      if (!address) return alert("⚠️ Please enter your FaucetPay address.");
-      if (!token) return alert("⚠️ Please complete captcha.");
+    if (!address) return alert("⚠️ Please enter your FaucetPay address.");
+    if (!token) return alert("⚠️ Please complete captcha.");
 
-      try {
-        const res = await fetch("/api/claim", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address, token }),
-        });
+    try {
+      const res = await fetch("/api/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address, token }),
+      });
 
-        const data = await res.json();
+      const data = await res.json();
 
-        if (data.success) {
-          alert(`✅ ${data.message}`);
-        } else {
-          alert(`❌ ${data.error || "Claim failed"}`);
-        }
-      } catch (err) {
-        alert("❌ Error: " + err.message);
+      if (data.success) {
+        // 🔑 gunakan pesan dari backend kalau ada
+        alert(`✅ ${data.message || "DOGE sent!"}`);
+      } else {
+        alert(`❌ ${data.error || "Claim failed."}`);
       }
+    } catch (err) {
+      console.error(err);
+      alert("❌ An error occurred. Please try again.");
     }
+  }
   </script>
 </body>
 </html>
-
