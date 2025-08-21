@@ -19,22 +19,22 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, message: "Captcha verification failed" });
     }
 
-    // 🎲 Random reward 50–100 satoshi DOGE
-    const min = 0.0000050; 
-    const max = 0.0000100;
-    const amountToSend = (Math.random() * (max - min) + min).toFixed(8);
+    // Random amount antara 0.00000050 DOGE (50 satoshi) - 0.00000500 DOGE (500 satoshi)
+const min = 0.00000050;
+const max = 0.00000500;
+const amount = (Math.random() * (max - min) + min).toFixed(8); // 8 desimal wajib
 
-    // FaucetPay API call
-    const fpRes = await fetch("https://faucetpay.io/api/v1/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        api_key: process.env.FAUCETPAY_API_KEY,
-        currency: "DOGE",
-        to: address,
-        amount: amountToSend
-      })
-    });
+// kirim ke FaucetPay
+const response = await fetch("https://faucetpay.io/api/v1/send", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    api_key: process.env.FAUCETPAY_API_KEY,
+    currency: "DOGE",
+    to: address,
+    amount: amount,
+  }),
+});
 
     const fpData = await fpRes.json();
 
