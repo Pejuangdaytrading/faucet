@@ -1,74 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DailyFunHub Faucet</title>
-
-  <!-- Monetag MiniApps SDK -->
-  <script src='//libtl.com/sdk.js' data-zone='9748411' data-sdk='show_9748411'></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
-      color: #fff;
+      font-family: 'Inter', sans-serif;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      justify-content: flex-start;
       min-height: 100vh;
-      padding: 20px;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
     }
 
-    .container {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border-radius: 15px;
-      padding: 25px;
-      max-width: 400px;
-      width: 100%;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    .faucet-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px 25px;
+      width: 350px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
       text-align: center;
     }
 
-    h1 {
+    .faucet-container h2 {
       margin-bottom: 5px;
-      font-size: 22px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1e3c72;
     }
 
-    h2 {
-      font-size: 16px;
-      font-weight: normal;
+    .faucet-container p {
+      font-size: 14px;
+      color: #555;
       margin-bottom: 20px;
     }
 
-    input[type="text"] {
-  width: 90%;               /* kasih jarak dari kiri-kanan */
-  max-width: 320px;         /* batasi supaya gak terlalu lebar */
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  margin: 0 auto 15px auto; /* auto center */
-  display: block;           /* wajib untuk bisa auto center */
-  font-size: 14px;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.15);
-  }
-
-    .captcha {
-      margin: 15px 0;
+    .faucet-container input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
     }
 
     button {
-      background: linear-gradient(90deg, #00c6ff, #0072ff);
+      width: 100%;
+      background: linear-gradient(90deg, #0072ff, #00c6ff);
       border: none;
       padding: 12px;
-      width: 100%;
-      color: #fff;
-      font-size: 16px;
-      border-radius: 8px;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
       cursor: pointer;
+      font-size: 15px;
       transition: 0.3s;
     }
 
@@ -76,39 +65,46 @@
       opacity: 0.9;
     }
 
-    .banner {
-      margin: 20px 0;
-      background: #f0f0f0;
-      border-radius: 10px;
-      overflow: hidden;
+    .ads {
+      margin: 15px 0;
+    }
+
+    #result {
+      margin-top: 12px;
+      font-size: 14px;
+      font-weight: 500;
     }
 
     footer {
-      margin-top: 20px;
       font-size: 12px;
-      opacity: 0.7;
+      margin-top: 15px;
+      color: #555;
+    }
+
+    footer a {
+      color: #0072ff;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>💎 DailyFunHub Faucet</h1>
-    <h2>Claim free DOGE every 5 minutes</h2>
+  <div class="faucet-container">
+    <h2>💎 DailyFunHub Faucet</h2>
+    <p>Claim free DOGE every 5 minutes</p>
 
-    <!-- Input Wallet -->
-    <input type="text" placeholder="Enter FaucetPay Wallet Address" />
+    <form id="faucetForm">
+      <input type="text" id="wallet" placeholder="Enter FaucetPay Wallet Address" required />
 
-    <!-- Captcha -->
-    <div class="captcha">
-      <input type="checkbox" id="captcha">
-      <label for="captcha"> I am human</label>
-    </div>
+      <!-- hCaptcha -->
+      <div class="h-captcha" data-sitekey="be2ebfca-fe7e-43ba-8406-34f4e02623d2"></div>
 
-    <!-- Claim Button -->
-    <button>🎁 Claim Faucet</button>
+      <button type="submit">🎁 Claim Faucet</button>
+    </form>
 
-    <!-- Adsterra Banner -->
-    <div class="banner">
+    <div id="result"></div>
+
+    <!-- Ads Banner -->
+    <div class="ads">
       <script type="text/javascript">
         atOptions = {
           'key' : '9f1e094095ee7889948135de9c7d050a',
@@ -122,14 +118,47 @@
     </div>
 
     <footer>
-      © 2025 DailyFunHub Faucet  
-      <br>
-      <a href="https://t.me/dailyfunhub_earnbot" style="color:#fff;">@dailyfunhub_earnbot</a>
+      © 2025 DailyFunHub Faucet <br />
+      <a href="https://t.me/dailyfunhub_earnbot">@dailyfunhub_earnbot</a>
     </footer>
   </div>
 
-  <!-- Adsterra Social Bar -->
-  <script type='text/javascript' src='//pl27468110.profitableratecpm.com/a6/68/b0/a668b013958e55610215c3779c508f5e.js'></script>
+  <!-- hCaptcha script -->
+  <script src="https://hcaptcha.com/1/api.js" async defer></script>
+
+  <!-- Monetag SDK -->
+  <script src='//libtl.com/sdk.js' data-zone='9748411' data-sdk='show_9748411'></script>
+
+  <script>
+    document.getElementById("faucetForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const address = document.getElementById("wallet").value.trim();
+      const captchaToken = document.querySelector('[name="h-captcha-response"]').value;
+
+      if (!captchaToken) {
+        document.getElementById("result").innerText = "❌ Please complete captcha";
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/claim", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address, captchaToken })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          document.getElementById("result").innerText = "✅ " + data.message;
+        } else {
+          document.getElementById("result").innerText = "❌ " + (data.message || "Claim failed");
+        }
+      } catch (err) {
+        document.getElementById("result").innerText = "⚠️ Server error";
+        console.error(err);
+      }
+    });
+  </script>
 </body>
 </html>
-
