@@ -3,7 +3,6 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     const body = req.body;
 
-    // pastikan ada message
     if (body.message && body.message.text === "/start") {
       const chatId = body.message.chat.id;
 
@@ -12,12 +11,20 @@ export default async function handler(req, res) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
-          text: "💎 Open Faucet",
+          text: "🚀 Klik tombol di bawah untuk buka Faucet MiniApp",
           reply_markup: {
-            keyboard: [[{ text: "💎 Open Faucet" }]],
-            resize_keyboard: true,
-            one_time_keyboard: true,
-          },
+            keyboard: [
+              [
+                {
+                  text: "💎 Open Faucet",
+                  web_app: {
+                    url: "https://faucet.dailyfunhub.site"
+                  }
+                }
+              ]
+            ],
+            resize_keyboard: true
+          }
         }),
       });
     }
