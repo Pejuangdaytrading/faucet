@@ -5,17 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DailyFunHub Faucet</title>
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-    .container { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
-    input { width: 90%; padding: 10px; margin: 10px 0; }
-    button { padding: 10px 20px; cursor: pointer; }
-  </style>
 </head>
 <body>
   <div class="container">
     <h2>💧 DailyFunHub Faucet</h2>
-    <input type="text" id="address" placeholder=be2ebfca-fe7e-43ba-8406-34f4e02623d2/>
+    <input type="text" id="address" placeholder="Enter FaucetPay DOGE Address"/>
     <div class="h-captcha" data-sitekey="YOUR_HCAPTCHA_SITE_KEY"></div>
     <br/>
     <button onclick="claimFaucet()">Claim Faucet</button>
@@ -33,7 +27,7 @@
         const res = await fetch("/api/claim", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address, token })
+          body: JSON.stringify({ address, token }),
         });
 
         const data = await res.json();
@@ -41,10 +35,10 @@
         if (data.success) {
           alert(`✅ ${data.message}`);
         } else {
-          alert(`❌ ${data.message}`);
+          alert(`❌ ${data.error || "Claim failed"}`);
         }
       } catch (err) {
-        alert("⚠️ Network error, please try again.");
+        alert("❌ Error: " + err.message);
       }
     }
   </script>
