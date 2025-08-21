@@ -1,5 +1,5 @@
 // claim.js
-const fetch = require("node-fetch");
+
 
 async function verifyCaptcha(token) {
   try {
