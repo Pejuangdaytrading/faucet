@@ -1,55 +1,63 @@
-// /api/claim.js
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
   try {
-    const { address, token } = req.body;
+    const { address, hcaptchaToken } = req.body;
 
-    // Verifikasi hCaptcha
-    const verifyResponse = await fetch("https://hcaptcha.com/siteverify", {
+    if (!address) {
+      return res.status(400).json({ success: false, message: "Wallet address is required" });
+    }
+
+    // ✅ Verifikasi hCaptcha
+    const hcaptchaVerify = await fetch("https://hcaptcha.com/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `response=${token}&secret=${process.env.HCAPTCHA_SECRET}`
+      body: new URLSearchParams({
+        secret: process.env.HCAPTCHA_SECRET,
+        response: hcaptchaToken,
+      }),
     });
-    const verifyData = await verifyResponse.json();
 
-    if (!verifyData.success) {
+    const hcaptchaData = await hcaptchaVerify.json();
+
+    if (!hcaptchaData.success) {
       return res.status(400).json({ success: false, message: "Captcha verification failed" });
     }
 
-    // Random amount antara 0.00000050 DOGE (50 satoshi) - 0.00000500 DOGE (500 satoshi)
-const min = 0.00000050;
-const max = 0.00000500;
-const amount = (Math.random() * (max - min) + min).toFixed(8); // 8 desimal wajib
+    // ✅ Random amount 50 – 500 satoshi DOGE
+    const min = 0.00000050;
+    const max = 0.00000500;
+    const amount = (Math.random() * (max - min) + min).toFixed(8); // 8 decimal
 
-// kirim ke FaucetPay
-const response = await fetch("https://faucetpay.io/api/v1/send", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    api_key: process.env.FAUCETPAY_API_KEY,
-    currency: "DOGE",
-    to: address,
-    amount: amount,
-  }),
-});
+    // ✅ Kirim ke FaucetPay
+    const fpResponse = await fetch("https://faucetpay.io/api/v1/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        api_key: process.env.FAUCETPAY_API_KEY,
+        currency: "DOGE",
+        to: address,
+        amount: amount,
+      }),
+    });
 
-    const fpData = await fpRes.json();
+    const result = await fpResponse.json();
 
     if (result.status === 200) {
-    return res.status(200).json({
+      return res.status(200).json({
         success: true,
-        message: `Claim successful: ${amount} DOGE sent!`
-    });
-} else {
-    return res.status(400).json({
+        message: `Claim successful: ${amount} DOGE sent!`,
+      });
+    } else {
+      return res.status(400).json({
         success: false,
-        message: result.message || "Error sending payment"
-    });
-}
+        message: result.message || "FaucetPay error",
+      });
+    }
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    console.error("Claim error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }
